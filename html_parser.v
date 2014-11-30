@@ -43,12 +43,62 @@ Definition getNameIndex (s: string): nat :=
       else plus index 16 
 (*16 is the lenth of x, thus the name starts 16 spaces from the begining of x*).
 
-Definition getNameLength (s: string): nat :=
-0.
 
+(*
+    This function takes in a string, s, and returns
+    the index of the first "<" character. The function
+    will return the length of the string s if there is 
+    no instance of the character "<".
+*)
+Fixpoint getEndIndex (s: string): nat := 
+  match s with
+    | EmptyString => 0
+    | String a s' => if (beq_ascii a "<")
+                     then 0
+                     else S (getEndIndex s')
+  end.
+
+(*
+    This function takes in a string, s, and returns
+    the length of the name in the string s.
+*)
+Definition getNameLength (s: string): nat := 
+  let startIndex := getNameIndex s in
+    let post := substring startIndex ((length s) - startIndex) s in 
+      getEndIndex post.
+
+(*
+    This function takes in a string, s, and returns
+    the name held within that string. If no name exists
+    within the string then it returns the EmptyString.
+*)
+Definition getName (s: string): string :=
+  substring (getNameIndex s) (getNameLength s) s.
+
+
+
+
+
+
+
+(*
+   -------------
+   ----Tests----
+   -------------
+*)
 Compute getNameIndex "sup". (*Should return 0*)
 Compute prefix "bob" "bobby". (*returns true*)
 Compute prefix "bobby" "bob". (*returns false*)
 
 Example bChicken : string := "<h1 class=""fn"" itemprop=""name"">Bourbon Chicken</h1>".
+Example ssfChicken : string := 
+        "<div class=""leady-hd rz-rec clrfix"">
+            <span class=""item"">
+                <h1 class=""fn"" itemprop=""name"">Savory Southern Fried Chicken</h1>
+            </span>
+            ...
+        </div>".
 Compute getNameIndex bChicken. (*should return 31*)
+Compute getNameLength bChicken. (*should return 15*)
+Compute getName bChicken. (*should return Bourbon Chicken*)
+Compute getName ssfChicken. (*should return Savory Southern Fried Chicken*)
