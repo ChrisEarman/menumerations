@@ -166,7 +166,7 @@ Fixpoint getIngredientsInternal (s: string) (n: nat): list string := (*n is used
     | S n' =>
         match getNextIngredient s with
           | EmptyString => nil
-          | s' => let start_index := indexOfSubstring s' s in
+          | s' => let start_index := (indexOfSubstring s' s) + (length s') in
                     let post_length := (length s) - start_index in
                       let post := substring start_index post_length s in
                         cons s' (getIngredientsInternal post n')
