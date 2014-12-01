@@ -213,24 +213,82 @@ Compute getPostIngredientSpan "sup". (*should return the EmptyString*)
 Compute getNextIngredient ssfChicken2. (*should return "cold water"*)
 Compute getNextIngredient "sup". (*should return the EmptyString*)
 Compute getIngredients ssfChicken2. (*should return ["cold water"; "fine sea salt"; nil]*)
-Compute getIngredients "sup". (*should return [nil]*)
+Compute getIngredients "sup</a>". (*should return [nil]*)
 
 
 (* -------------------------------
    ------Recipe Instructions------
    -------------------------------*)
 
-Definition getInstructionIndex (s: string): nat := 0.
+(*
+   This function takes in a string, s, and returns
+   the index of the first instruction of the recipe.
+   If s has no recognizable instructions, then the
+   function will return 0.
+*)
+Definition getInstructionIndex (s: string): nat := 
+  let x := "div class=""txt"">" in
+    let index := indexOfSubstring x s in
+      if (beq_nat index (length s))
+      then 0
+      else index + 16
+(*16 is the length of x, thus the ingredient starts 16 spaces from the begining of x*).
 
+(*
+    This function takes in a string, s, and returns
+    the length of the first instruction in the string s.
+*)
+Definition getInstructionLength (s: string): nat :=
+  let start_index := getInstructionIndex s in
+    let post_length := (length s) - start_index in
+      let post := substring start_index post_length s in
+        indexOfSubstring "</div>" post.
 
-Definition getInstructionLength (s: string): nat := 0.
+(*
+    This function takes in a string, s, and returns
+    the first instance of an instruction.
+    
+    If no instruction is found it will return the 
+    EmptyString.
 
-Definition getNextInstruction (s: string): string := EmptyString.
+    This function assumes all instructions have 
+    associated <div></div> tags as wrappers
+*)
+Definition getNextInstruction (s: string): string :=
+  let start_index := getInstructionIndex s in
+    let instruction_length := getInstructionLength s in
+      let instruction := substring start_index instruction_length s in
+        if (beq_nat start_index 0)
+        then EmptyString
+        else instruction.
+(*
+    This function takes in a string, s, and a nat, n,
+    and returns the list of instructions. This function
+    uses n as its decreasing argument for a proof of
+    termination. n should be the length of the string
+    it is assumed that n is greater than or equal to
+    the number of instructions in s.
+*)
+Fixpoint getInstructionsInternal (s: string) (n: nat): list string := 
+  match n with
+    | 0 => nil
+    | S n' => match getNextInstruction s with
+                | EmptyString => nil
+                | s' => let start_index := (indexOfSubstring s' s) + (length s') in
+                          let post_length := (length s) - start_index in
+                            let post := substring start_index post_length s in
+                              cons s' (getInstructionsInternal post n')
+              end
+  end.
 
-
-Fixpoint getInstructionsInternal (s: string) (n: nat): list string := nil.
-
-Definition getInstructions (s: string): list string := nil.
+(*
+    This function takes in a string, s, and returns
+    the list of instructions found within s. if no
+    ingredients are present in s, then it returns
+    the empty list, nil.
+*)
+Definition getInstructions (s: string): list string := 
+  getInstructionsInternal s (length s).
 
 
 Example ssfChicken3 := 
@@ -248,6 +306,7 @@ Example ssfChicken3 :=
 			<li><div class=""num"">8</div> <div class=""txt"">Serve over hot rice and ENJOY.</div></li>
 	</ol>
 	</span>		
-</div>"
+</div>".
 
-
+Compute getInstructions ssfChicken3. (*should return ["Editor's Note:...";...;"...and ENJOY.";nil]*)
+Compute getInstructions "sup</div>". (*should return [nil]*)
