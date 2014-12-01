@@ -181,6 +181,8 @@ Fixpoint getIngredientsInternal (s: string) (n: nat): list string := (*n is used
 Definition getIngredients (s: string): list string :=
   getIngredientsInternal s (length s).
 
+
+(* ------ tests -------- *)
 Example ssfChicken2: string := 
         "<li class=""ingredient"" itemprop=""ingredients"">
             <span class=""ingredient"">
@@ -214,5 +216,38 @@ Compute getIngredients ssfChicken2. (*should return ["cold water"; "fine sea sal
 Compute getIngredients "sup". (*should return [nil]*)
 
 
+(* -------------------------------
+   ------Recipe Instructions------
+   -------------------------------*)
+
+Definition getInstructionIndex (s: string): nat := 0.
+
+
+Definition getInstructionLength (s: string): nat := 0.
+
+Definition getNextInstruction (s: string): string := EmptyString.
+
+
+Fixpoint getInstructionsInternal (s: string) (n: nat): list string := nil.
+
+Definition getInstructions (s: string): list string := nil.
+
+
+Example ssfChicken3 := 
+"<div class=""pod directions"">
+	<h2>Directions:</h2>
+	<span class=""instructions""  itemprop=""recipeInstructions"">
+	<ol>
+			<li><div class=""num"">1</div> <div class=""txt"">Editor's Note:  Named Bourbon Chicken because it was supposedly created by a Chinese cook who worked in a restaurant on Bourbon Street.</div></li>
+			<li><div class=""num"">2</div> <div class=""txt"">Heat oil in a large skillet.</div></li>
+			<li><div class=""num"">3</div> <div class=""txt"">Add chicken pieces and cook until lightly browned.</div></li>
+			<li><div class=""num"">4</div> <div class=""txt"">Remove chicken.</div></li>
+			<li><div class=""num"">5</div> <div class=""txt"">Add remaining ingredients, heating over medium Heat until well mixed and dissolved.</div></li>
+			<li><div class=""num"">6</div> <div class=""txt"">Add chicken and bring to a hard boil.</div></li>
+			<li><div class=""num"">7</div> <div class=""txt"">Reduce heat and simmer for 20 minutes.</div></li>
+			<li><div class=""num"">8</div> <div class=""txt"">Serve over hot rice and ENJOY.</div></li>
+	</ol>
+	</span>		
+</div>"
 
 
