@@ -2,14 +2,6 @@ Require Import String.
 Require Import Ascii.
 Require Import Arith.
 
-Local Open Scope string_scope.
-
-
-Example Space := " ".
-
-Example HelloWorld: string := " ""Hello world!"" ".
-
-Print HelloWorld.
 
 Definition ascii2nat (a : ascii) :=
   match a with
@@ -33,6 +25,19 @@ Print ascii2nat.
 Definition beq_ascii (a1 a2: ascii) : bool :=
   beq_nat (ascii2nat a1) (ascii2nat a2).
 
+(*
+    This function takes in an option ascii, oA, 
+    and returns that ascoo. If the option is 
+    None then it returns a default value. This 
+    function should not be used to evaluation
+    Some "000".
+*)
+Local Open Scope char_scope.
+Definition option2ascii (oA: option ascii): ascii :=
+  match oA with
+    | None => "000"
+    | Some a => a
+  end.
 
 
 (* These functions are not included in Arith for some reason,

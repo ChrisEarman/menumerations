@@ -50,7 +50,18 @@ Fixpoint getEndIndex (s: string) (a: ascii): nat :=
     White space is definied as either a 'space'
     or a 'new line'
 *)
-Fixpoint removeTrailingWhiteSpace (s: string): string := EmptyString.
+Fixpoint removeTrailingWhiteSpace (s: string) (n: nat): string := 
+  let lastChar := option2ascii (get n s) in
+    match n with
+      | 0 => EmptyString
+      | S n' => if (beq_ascii lastChar " ")
+                then removeTrailingWhiteSpace (substring 0 n s) n'
+                else if (beq_ascii lastChar "
+")
+                     then removeTrailingWhiteSpace (substring 0 n s) n'
+                     else s
+    end.
+
 
 
 (*
@@ -61,7 +72,13 @@ Fixpoint removeTrailingWhiteSpace (s: string): string := EmptyString.
     White space is definied as either a 'space'
     or a 'new line'
 *)
-Fixpoint removeLeadingWhiteSpace (s: string): string := EmptyString.
+Fixpoint removeLeadingWhiteSpace (s: string): string := 
+  match s with
+    | String " " s1 => removeLeadingWhiteSpace s1
+    | String "
+" s2 => removeLeadingWhiteSpace s2
+    | s' => s'
+  end.
 
 (*
     This function takes in a string, s, and
@@ -72,12 +89,20 @@ Fixpoint removeLeadingWhiteSpace (s: string): string := EmptyString.
     or a 'new line'.
 *)
 Definition trimWhiteSpace (s: string): string :=
-  removeTrailingWhiteSpace (removeLeadingWhiteSpace s).
+  removeLeadingWhiteSpace (removeTrailingWhiteSpace s ((length s) - 1)).
 
 
 (* ------ tests -------- *)
 Compute prefix "bob" "bobby". (*returns true*)
 Compute prefix "bobby" "bob". (*returns false*)
+Compute removeLeadingWhiteSpace " 
+  sup". (* should return "sup"*)
+Compute option2ascii (get 2 "sup"). (*should return "p"*)
+Compute removeTrailingWhiteSpace "sup  
+  " 7. (*should return "sup"*)
+Compute trimWhiteSpace "  
+ sup 
+ ". (*should return "sup"*)
 
 (* -------------------------------
    ------Recipe Name--------------
@@ -111,7 +136,7 @@ Definition getNameLength (s: string): nat :=
     within the string then it returns the EmptyString.
 *)
 Definition getName (s: string): string :=
-  substring (getNameIndex s) (getNameLength s) s.
+  trimWhiteSpace (substring (getNameIndex s) (getNameLength s) s).
 
 (* ------ tests -------- *)
 Compute getNameIndex "sup". (*Should return 0*)
@@ -213,7 +238,7 @@ Definition getNextIngredient (s: string): string:=
                        in 
       let end_index := getIngredientEndIndex post in
         let ingredient_length := end_index - start_index in
-          substring start_index ingredient_length post.
+          trimWhiteSpace (substring start_index ingredient_length post).
 
 (*
     This function takes in a string, s, and a nat, n,
@@ -339,7 +364,7 @@ Definition getNextInstruction (s: string): string :=
       let instruction := substring start_index instruction_length s in
         if (beq_nat start_index 0)
         then EmptyString
-        else instruction.
+        else trimWhiteSpace instruction.
 (*
     This function takes in a string, s, and a nat, n,
     and returns the list of instructions. This function
