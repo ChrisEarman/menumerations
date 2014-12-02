@@ -42,6 +42,39 @@ Fixpoint getEndIndex (s: string) (a: ascii): nat :=
                       else S (getEndIndex s' a)
   end.
 
+(*
+    This function takes in a string, s, and
+    returns the string with trailing white
+    space removed.
+
+    White space is definied as either a 'space'
+    or a 'new line'
+*)
+Fixpoint removeTrailingWhiteSpace (s: string): string := EmptyString.
+
+
+(*
+    This function takes in a string, s, and
+    returns the string with leading white
+    space removed.
+
+    White space is definied as either a 'space'
+    or a 'new line'
+*)
+Fixpoint removeLeadingWhiteSpace (s: string): string := EmptyString.
+
+(*
+    This function takes in a string, s, and
+    returns the string with leading and trailing
+    white space removed.
+
+    White space is defined as either a 'space'
+    or a 'new line'.
+*)
+Definition trimWhiteSpace (s: string): string :=
+  removeTrailingWhiteSpace (removeLeadingWhiteSpace s).
+
+
 (* ------ tests -------- *)
 Compute prefix "bob" "bobby". (*returns true*)
 Compute prefix "bobby" "bob". (*returns false*)
