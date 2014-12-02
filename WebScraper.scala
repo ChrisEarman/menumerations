@@ -4,24 +4,45 @@ import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Await
 import scala.concurrent._
+//import reactivemongo.api._
+//import reactivemongo.bson._
 
 object WebScraper {
 
+  /**
+   *  Returns a string consisting of the entire contents of the HTML file associated
+   *  with the given recipe number.  All recipes on food.com are given a numerical
+   *  ID, ranging from ~40 to ~519809 (as of Dec 1, 2014).  As new recipes are added,
+   *  they are assigned the next available ID.
+   */
   def downloadRecipeFile(recipeNum: Int): String = {
-    val html = Source.fromURL("http://www.food.com/hello-" + recipeNum, "UTF-8")
+    val html = Source.fromURL("http://www.food.com/" + recipeNum + "-" + recipeNum, "UTF-8")
     val s = html.mkString
     return s
   }
 
+  /**
+   *  Returns a [Recipe] object from the given string.  This string represents the
+   *  contents of a food.com recipe HTML file.
+   */
   def parseRecipeFile(recipeStr: String): Recipe = {
-    return new Recipe(null, null)
+    return new Recipe(null, null, 0)
   }
-  
-  def storeRecipe(recipe: Recipe) = {
-    
-  }
-  
+
+  /**
+   *  Stores a [Recipe] object in a Mongo database by first converting it into a
+   *  BSON document.
+   */
+//  def storeRecipe(recipe: Recipe, collection: BSONCollection) = {
+//
+//  }
+
   def main(args: Array[String]) {
+
+//    val driver = new MongoDriver
+//    val connection = driver.connection(List("localhost"))
+//    val db = connection("menumerations")
+//    val recipeCollection = db("recipes")
 
     /**
      *  Create tasks for downloading the HTML file for each recipe on food.com.
@@ -35,14 +56,14 @@ object WebScraper {
       try {
         val recipeStr = downloadRecipeFile(i)
         val recipe = parseRecipeFile(recipeStr)
-        storeRecipe(recipe)
+//        storeRecipe(recipe, recipeCollection)
       } catch {
         case e: Exception => ;
       }
     }
 
     /**
-     *  Sequences the above tasks
+     *  Aggregates the above tasks
      */
     val aggregated: Future[Seq[Unit]] = Future.sequence(tasks)
 
