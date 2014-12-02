@@ -134,6 +134,33 @@ Definition getPostIngredientSpan (s: string): string:=
         then EmptyString
         else output.
 
+(*
+    This function takes in a string, s, and returns
+    the first instance of a close tag of type </a>
+    or of type </span>. This helps us to find the 
+    end index of an ingredient.
+*)
+Definition getIngredientEndIndex (s: string): nat :=
+  let candidate_a := indexOfSubstring "</a>" s in
+    let candidate_span := indexOfSubstring "</span>" s in
+      if (blt_nat candidate_a candidate_span)
+      then candidate_a
+      else candidate_span.
+
+(*
+   This function takes in a string, s, and 
+   returns true if the first instance of an
+   </a> close tag in s appears before the 
+   first instance of a </span> close tag
+   in s. This is used to determine if a 
+   given ingredient includes a link or not   
+*)
+Definition includesLink (s: string): bool :=
+  let candidate_a := indexOfSubstring "</a>" s in
+    let end_index := getIngredientEndIndex s in
+      if (beq_nat candidate_a end_index)
+      then true
+      else false.
 
 (*
     This function takes in a string, s, and returns
@@ -147,8 +174,11 @@ Definition getPostIngredientSpan (s: string): string:=
 *)
 Definition getNextIngredient (s: string): string:=
   let post := getPostIngredientSpan s in
-    let start_index := (getEndIndex post ">") + 1 in 
-      let end_index := indexOfSubstring "</a>" post in
+    let start_index := if (includesLink post)
+                       then (getEndIndex post ">") + 1 
+                       else 0 
+                       in 
+      let end_index := getIngredientEndIndex post in
         let ingredient_length := end_index - start_index in
           substring start_index ingredient_length post.
 
@@ -166,7 +196,7 @@ Fixpoint getIngredientsInternal (s: string) (n: nat): list string := (*n is used
     | S n' =>
         match getNextIngredient s with
           | EmptyString => nil
-          | s' => let start_index := indexOfSubstring s' s in
+          | s' => let start_index := (indexOfSubstring s' s) + (length s') in
                     let post_length := (length s) - start_index in
                       let post := substring start_index post_length s in
                         cons s' (getIngredientsInternal post n')
@@ -206,7 +236,7 @@ Example ssfChicken2: string :=
                 </span>
             </span>
         </li>".
-Compute getIngredientIndex ssfChicken2. (*should return 84*)
+Compute getIngredientIndex ssfChicken2. (*should return 285*)
 Compute getIngredientIndex "sup". (*should return 0*)
 Compute getPostIngredientSpan ssfChicken2. (*should start with "<a href=..." and include both cold water and fine sea salt*) 
 Compute getPostIngredientSpan "sup". (*should return the EmptyString*)
@@ -214,6 +244,22 @@ Compute getNextIngredient ssfChicken2. (*should return "cold water"*)
 Compute getNextIngredient "sup". (*should return the EmptyString*)
 Compute getIngredients ssfChicken2. (*should return ["cold water"; "fine sea salt"; nil]*)
 Compute getIngredients "sup</a>". (*should return [nil]*)
+Example bChicken2: string := "<li class=""ingredient""  itemprop=""ingredients"">
+                            <span class=""ingredient""><span class=""amount""><span class=""value"">1/4</span> <span class=""type"">cup</span></span> 
+                            <span class=""name"">
+                            apple juice
+                            </span>
+                            </span>
+                            </li>
+                            <li class=""ingredient""  itemprop=""ingredients"">
+                            <span class=""ingredient""><span class=""amount""><span class=""value"">1/3</span> <span class=""type"">cup</span></span> 
+                            <span class=""name"">
+                                <a href=""http://www.food.com/library/brown-sugar-375"">light brown sugar</a>
+                            </span>
+                            </span>
+                            </li>".
+Compute getNextIngredient bChicken2. (*should be "apple juice", however leading and trailing whitespace is included*)
+Compute getIngredients bChicken2. (*should be [apple juice; light brown sugar; nil], however it includes additional leading whitespace*)
 
 
 (* -------------------------------
