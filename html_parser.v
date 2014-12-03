@@ -29,20 +29,6 @@ Fixpoint indexOfSubstring (sub s: string): nat :=
        end.
 
 (*
-    This function takes in a string, s, and returns
-    the index of the first character a. The function
-    will return the length of the string s if there is 
-    no instance of the character a.
-*)
-Fixpoint getEndIndex (s: string) (a: ascii): nat := 
-  match s with
-    | EmptyString => 0
-    | String s1 s' => if (beq_ascii s1 a)
-                      then 0
-                      else S (getEndIndex s' a)
-  end.
-
-(*
     This function takes in a string, s, and
     returns the string with trailing white
     space removed.
@@ -128,7 +114,7 @@ Definition getNameIndex (s: string): nat :=
 Definition getNameLength (s: string): nat := 
   let startIndex := getNameIndex s in
     let post := substring startIndex ((length s) - startIndex) s in 
-      getEndIndex post "<".
+      indexOfSubstring "<" post.
 
 (*
     This function takes in a string, s, and returns
@@ -233,7 +219,7 @@ Definition includesLink (s: string): bool :=
 Definition getNextIngredient (s: string): string:=
   let post := getPostIngredientSpan s in
     let start_index := if (includesLink post)
-                       then (getEndIndex post ">") + 1 
+                       then (indexOfSubstring ">" post) + 1 
                        else 0 
                        in 
       let end_index := getIngredientEndIndex post in
