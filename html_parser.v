@@ -122,7 +122,11 @@ Definition getNameLength (s: string): nat :=
     within the string then it returns the EmptyString.
 *)
 Definition getName (s: string): string :=
-  trimWhiteSpace (substring (getNameIndex s) (getNameLength s) s).
+  let start_index := getNameIndex s in
+    let name_length := getNameLength s in
+      if (beq_nat start_index 0)
+      then EmptyString
+      else trimWhiteSpace (substring start_index name_length s).
 
 (* ------ tests -------- *)
 Compute getNameIndex "sup". (*Should return 0*)
@@ -138,6 +142,7 @@ Compute getNameIndex bChicken. (*should return 31*)
 Compute getNameLength bChicken. (*should return 15*)
 Compute getName bChicken. (*should return Bourbon Chicken*)
 Compute getName ssfChicken. (*should return Savory Southern Fried Chicken*)
+Compute getName "sup<". (*should be EmptyString*)
 
 
 (* -------------------------------
