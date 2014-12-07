@@ -7,6 +7,4 @@ package menumerations
  *  
  *  (NOTE: more fields will likely be added in the future.)
  */
-case class Instruction(text: String) {
-
-}
+case class Instruction(text: String)

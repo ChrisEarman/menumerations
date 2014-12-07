@@ -6,8 +6,9 @@ import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import scala.io.Source
-//import reactivemongo.api._
-//import reactivemongo.bson._
+import reactivemongo.api._
+import reactivemongo.bson._
+import reactivemongo.api.collections.default._
 
 object WebScraper {
 
@@ -32,7 +33,11 @@ object WebScraper {
   def parseRecipeFile(recipeStr: String, recipeId: Int): Recipe = {
     val ingredients = getIngredients(recipeStr: String)
     val instructions = getInstructions(recipeStr: String)
-    return new Recipe(ingredients, instructions, recipeId)
+    if (!ingredients.isEmpty && !instructions.isEmpty) {
+      return new Recipe(ingredients, instructions, recipeId)
+    } else {
+      return null
+    }
   }
 
   def getIngredients(recipeStr: String): Set[Ingredient] = {
@@ -71,19 +76,71 @@ object WebScraper {
     }
   }
 
+
+  /**
+   *  Writer and reader objects for converting 
+   *  between [Instruction] objects and BSON
+   */
+  implicit object InstructionWriter extends BSONDocumentWriter[Instruction] {
+    def write(instruction: Instruction): BSONDocument = BSONDocument(
+      "text" -> instruction.text)
+  }
+
+  implicit object InstructionReader extends BSONDocumentReader[Instruction] {
+    def read(doc: BSONDocument): Instruction = Instruction(
+      doc.getAs[String]("text").get)
+  }
+
+
+  /**
+   *  Writer and reader objects for converting 
+   *  between [Ingredient] objects and BSON
+   */
+  implicit object IngredientWriter extends BSONDocumentWriter[Ingredient] {
+    def write(ingredient: Ingredient): BSONDocument = BSONDocument(
+      "text" -> ingredient.text)
+  }
+
+  implicit object IngredientReader extends BSONDocumentReader[Ingredient] {
+    def read(doc: BSONDocument): Ingredient = Ingredient(
+      doc.getAs[String]("text").get,
+      null)
+  }
+
+
+  /**
+   *  Writer and reader objects for converting 
+   *  between [Recipe] objects and BSON
+   */
+  implicit object RecipeWriter extends BSONDocumentWriter[Recipe] {
+    def write(recipe: Recipe): BSONDocument = BSONDocument(
+      "_id" -> recipe.id,
+      "ingredients" -> recipe.ingredients,
+      "instructions" -> recipe.instructions)
+  }
+
+  implicit object RecipeReader extends BSONDocumentReader[Recipe] {
+    def read(doc: BSONDocument): Recipe = Recipe(
+      doc.getAs[Set[Ingredient]]("ingredients").get,
+      doc.getAs[Seq[Instruction]]("instructions").get,
+      doc.getAs[Int]("recipe_id").get)
+  }
+
+
   /**
    *  Stores a [Recipe] object in a Mongo database by first converting it into a
    *  BSON document.
    */
-  //  def storeRecipe(recipe: Recipe, collection: BSONCollection) = {
-  //
-  //  }
+  def storeRecipe(recipe: Recipe, collection: BSONCollection): Unit = {
+    val recipeDoc = BSON.write(recipe)
+    collection.insert(recipeDoc)
+  }
 
   def run() = {
-    //    val driver = new MongoDriver
-    //    val connection = driver.connection(List("localhost"))
-    //    val db = connection("menumerations")
-    //    val recipeCollection = db("recipes")
+    val driver = new MongoDriver
+    val connection = driver.connection(List("localhost"))
+    val db = connection("menumerations")
+    val recipeCollection = db("recipes")
 
     /**
      *  Create tasks for downloading the HTML file for each recipe on food.com.
@@ -97,7 +154,10 @@ object WebScraper {
       try {
         val recipeStr = downloadRecipeFile(i)
         val recipe = parseRecipeFile(recipeStr, i)
-        //        storeRecipe(recipe, recipeCollection)
+        println("Parsed recipe " + i)
+        if (recipe != null) { //TODO: Use option type!
+          storeRecipe(recipe, recipeCollection)
+        }
       } catch {
         case e: Exception => ;
       }
@@ -116,10 +176,10 @@ object WebScraper {
   }
 
   def main(args: Array[String]) {
-      val recipeStr = downloadRecipeFile(450324)
-      val recipe = parseRecipeFile(recipeStr, 519609)
-      println(recipe.ingredients)
-      println(recipe.instructions)
-//    run
+      // val recipeStr = downloadRecipeFile(450324)
+      // val recipe = parseRecipeFile(recipeStr, 519609)
+      // println(recipe.ingredients)
+      // println(recipe.instructions)
+   run
   }
 }

@@ -9,6 +9,4 @@ package menumerations
  *      
  *  (NOTE: more fields will likely be added in the future.)
  */
-case class Ingredient(text: String, amount: Amount) {
-
-}
+case class Ingredient(text: String, amount: Amount)
