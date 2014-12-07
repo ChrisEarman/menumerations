@@ -1,3 +1,0 @@
-2014-12-07 13:10:40,654 ERROR [main] - org.scala-ide.sdt.core - org.scala-ide.sdt.core - org.scala-ide.sdt.core - 0 - scala.reflect.internal.MissingRequirementError: object scala.runtime in compiler mirror not found.
-2014-12-07 13:15:22,503 ERROR [main] - org.scala-ide.sdt.core - org.scala-ide.sdt.core - org.scala-ide.sdt.core - 0 - scala.reflect.internal.MissingRequirementError: object scala.runtime in compiler mirror not found.
-2014-12-07 13:16:59,927 ERROR [main] - org.scala-ide.sdt.core - org.scala-ide.sdt.core - org.scala-ide.sdt.core - 0 - scala.reflect.internal.MissingRequirementError: object scala.runtime in compiler mirror not found.
