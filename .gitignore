@@ -1,3 +1,4 @@
 *.glob
 *.vo
 target/*
+project/*
