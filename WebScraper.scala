@@ -1,9 +1,11 @@
 package menumerations
-import scala.io.Source
-import scala.concurrent.duration._
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Await
+
+import scala.collection.immutable._
 import scala.concurrent._
+import scala.concurrent.Await
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration._
+import scala.io.Source
 //import reactivemongo.api._
 //import reactivemongo.bson._
 
@@ -24,25 +26,64 @@ object WebScraper {
   /**
    *  Returns a [Recipe] object from the given string.  This string represents the
    *  contents of a food.com recipe HTML file.
+   *
+   *  The current implementation will be replaced by code extracted from Coq.
    */
-  def parseRecipeFile(recipeStr: String): Recipe = {
-    return new Recipe(null, null, 0)
+  def parseRecipeFile(recipeStr: String, recipeId: Int): Recipe = {
+    val ingredients = getIngredients(recipeStr: String)
+    val instructions = getInstructions(recipeStr: String)
+    return new Recipe(ingredients, instructions, recipeId)
+  }
+
+  def getIngredients(recipeStr: String): Set[Ingredient] = {
+    val start = recipeStr.indexOfSlice("<span class=\"name\">") + 19
+    if (start == 18) {
+      return Set()
+    } else {
+      val end = recipeStr.indexOfSlice("</span>", start)
+      val tail = recipeStr.slice(end + 7, recipeStr.length())
+      val slice = removeTags(recipeStr.slice(start, end)).split("\\s+").tail.mkString(" ")
+      return getIngredients(tail) + Ingredient(slice, null)
+    }
+  }
+
+  def getInstructions(recipeStr: String): Seq[Instruction] = {
+    val start = recipeStr.indexOfSlice("<div class=\"txt\">") + 17
+    if (start == 16) {
+      return Seq()
+    } else {
+      val end = recipeStr.indexOfSlice("</div>", start)
+      val tail = recipeStr.slice(end + 6, recipeStr.length())
+      val slice = recipeStr.slice(start, end)
+      return Instruction(slice) +: getInstructions(tail)
+    }
+  }
+  
+  def removeTags(str: String): String = {
+    val start = str.indexOfSlice("<")
+    if (start == -1) {
+      return str
+    } else {
+      val end = str.indexOfSlice(">", start)
+      val tail = str.slice(end + 1, str.length())
+      val head = str.slice(0, start)
+      return head + removeTags(tail)
+    }
   }
 
   /**
    *  Stores a [Recipe] object in a Mongo database by first converting it into a
    *  BSON document.
    */
-//  def storeRecipe(recipe: Recipe, collection: BSONCollection) = {
-//
-//  }
+  //  def storeRecipe(recipe: Recipe, collection: BSONCollection) = {
+  //
+  //  }
 
-  def main(args: Array[String]) {
-
-//    val driver = new MongoDriver
-//    val connection = driver.connection(List("localhost"))
-//    val db = connection("menumerations")
-//    val recipeCollection = db("recipes")
+  def run() = {
+    //    val driver = new MongoDriver
+    //    val connection = driver.connection(List("localhost"))
+    //    val db = connection("menumerations")
+    //    val recipeCollection = db("recipes")
 
     /**
      *  Create tasks for downloading the HTML file for each recipe on food.com.
@@ -55,8 +96,8 @@ object WebScraper {
     val tasks: Seq[Future[Unit]] = for (i <- 1 to 519809) yield future {
       try {
         val recipeStr = downloadRecipeFile(i)
-        val recipe = parseRecipeFile(recipeStr)
-//        storeRecipe(recipe, recipeCollection)
+        val recipe = parseRecipeFile(recipeStr, i)
+        //        storeRecipe(recipe, recipeCollection)
       } catch {
         case e: Exception => ;
       }
@@ -72,5 +113,13 @@ object WebScraper {
      *  4 hours have passed.
      */
     val res: Seq[Unit] = Await.result(aggregated, 4.hours)
+  }
+
+  def main(args: Array[String]) {
+      val recipeStr = downloadRecipeFile(450324)
+      val recipe = parseRecipeFile(recipeStr, 519609)
+      println(recipe.ingredients)
+      println(recipe.instructions)
+//    run
   }
 }
