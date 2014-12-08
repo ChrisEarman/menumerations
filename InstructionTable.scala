@@ -42,7 +42,7 @@ class InstructionTable(instructionList: List[String]) {
  	      ((s, count + 1)::t).toSet
  	    }
  	    else{
- 	      addString2FrequencySet(s, t)
+ 	      addString2FrequencySet(s, t) ++ Set((st, count))
  	    } 
  	  }
  	}
