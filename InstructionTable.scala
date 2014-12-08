@@ -4,12 +4,12 @@ package menumeration
  * This class will be used to map substrings of instructions to
  * words that are likely to come after those substrings.
  */
-class InstructionTable(instructionList: List[String]) {
+class InstructionTable(instructionList: List[(String, Int)]) {
 	// This function takes outputs the list that was given in the constructor
-	def it_get_list(): List[String] = instructionList
+	def it_get_list(): List[(String, Int)] = instructionList
 	// This function takes in an instruction as a string and 
 	// returns the classes list with the new instruction added in
- 	def it_add_instruct(instruction: String): List[String] = instruction::instructionList
+ 	def it_add_instruct(instruction: (String, Int)): List[(String, Int)] = instruction::instructionList
  	// This function takes in a seedlength and an instruction as an array of strings
  	// and it outputs the instruction table for that particular instruction.
  	def it_get_table_unit(seedLength: Int, instruction: Array[String]): Map[String, List[String]] = 
@@ -23,11 +23,11 @@ class InstructionTable(instructionList: List[String]) {
  	  }
 	// This function takes in a seedLength and a list of instructions, and 
 	// returns the instruction table for that list of instructions
- 	def it_get_table_internal(seedLength: Int, l: List[String]): Map[String, List[String]] = l match{
+ 	def it_get_table_internal(seedLength: Int, l: List[(String, Int)]): Map[String, List[String]] = l match{
 	  case List() => Map()
 	  
-	  case h::t => 
-	    	{	val map1 = it_get_table_unit(seedLength,h.split("\\s+")) 
+	  case (st, id)::t => 
+	    	{	val map1 = it_get_table_unit(seedLength,st.split("\\s+")) 
  	  			val map2 = it_get_table_internal(seedLength, t)
  	  			map1 ++ map2.map{ case (k,v) => k -> (map1.getOrElse(k,List()) ++ v) }
 	    	}
@@ -69,19 +69,20 @@ class InstructionTable(instructionList: List[String]) {
  	    mapStringList2mapStringSet_internal(m, m.keys.toList)
  	// This function takes in a seedlength and returns the instruction table
  	// for the classes instruction list
-	def it_get_table(seedLength: Int, recipeID: Int): Map[String,Set[(String, Int)]] = {
+	def it_get_frequency_table(seedLength: Int): Map[String,Set[(String, Int)]] = {
 	  val mapStringList = it_get_table_internal(seedLength, instructionList)
 	  val output = mapStringList2mapStringSet(mapStringList)
 	  output
 	}
+ 	
 }
 
 object tester{
 	def main(args: Array[String]){
-		val testInst = List("Put the cookies on the sheet","Insert the cookies into the oven", "Put the cookies on a cooling rack")
+		val testInst = List(("Put the cookies on the sheet",123),("Insert the cookies into the oven",123), ("Put the cookies on a cooling rack",456))
 		val it1 = new InstructionTable(testInst)
 		println(it1.it_get_list())
-		println(it1.it_add_instruct("sup"))
-		println(it1.it_get_table(2, 11223344))
+		println(it1.it_add_instruct(("sup",999)))
+		println(it1.it_get_frequency_table(2))
 	}
 }
