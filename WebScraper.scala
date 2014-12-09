@@ -40,6 +40,9 @@ object WebScraper {
     }
   }
 
+  /**
+   *  Returns a set of [Ingredient] objects from the given HTML string.
+   */
   def getIngredients(recipeStr: String): Set[Ingredient] = {
     val start = recipeStr.indexOfSlice("<span class=\"name\">") + 19
     if (start == 18) {
@@ -52,6 +55,9 @@ object WebScraper {
     }
   }
 
+  /**
+   *  Returns a set of [Instruction] objects from the given HTML string.
+   */
   def getInstructions(recipeStr: String): Seq[Instruction] = {
     val start = recipeStr.indexOfSlice("<div class=\"txt\">") + 17
     if (start == 16) {
@@ -64,6 +70,10 @@ object WebScraper {
     }
   }
   
+  /**
+   *  Strips all characters between < and >, inclusive, when
+   *  found in a string.  Assumes the string is valid HTML.
+   */
   def removeTags(str: String): String = {
     val start = str.indexOfSlice("<")
     if (start == -1) {
@@ -112,6 +122,9 @@ object WebScraper {
   }
 
   def run() = {
+    /**
+     *  Establishes connection to "recipe" collection in "menumerations" db
+     */
     val driver = new MongoDriver
     val connection = driver.connection(List("localhost"))
     val db = connection("menumerations")
