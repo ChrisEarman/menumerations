@@ -35,7 +35,7 @@ Definition str_eq (s1 s2: string): bool :=
  *  That is, t2 is adjacent to t1 iff
  *    t2 = (a, b, c, _) and t1 = (_, a, b, c).
  *)
-Fixpoint getAdjacent (t1: tuple4) (lst: list tuple4): list tuple4 :=
+Fixpoint getAdjacencyList_impl (t1: tuple4) (lst: list tuple4): list tuple4 :=
   match lst with
     | cons h t =>
       match h with
@@ -43,9 +43,30 @@ Fixpoint getAdjacent (t1: tuple4) (lst: list tuple4): list tuple4 :=
           match t1 with
             | quadruple _ d e f _ =>
               if (andb (str_eq a d) (andb (str_eq b e) (str_eq c f)))
-                  then cons h (getAdjacent t1 t)
-                  else getAdjacent t1 t
+                  then cons h (getAdjacencyList_impl t1 t)
+                  else getAdjacencyList_impl t1 t
           end
       end
     | nil => nil
   end.
+
+Definition getAdjacencyList (t1: tuple4) (g: four_gram_graph): list tuple4 :=
+  getAdjacencyList_impl t1 (expose_list g).
+
+Definition addTuple (t1: tuple4) (g: four_gram_graph): four_gram_graph :=
+  mk_graph (cons t1 (expose_list g)).
+
+Definition emptyGraph: four_gram_graph :=
+  mk_graph nil.
+
+
+Example ex1 := quadruple "add" "salt" "and" "vinegar" 1.
+Example ex2 := quadruple "salt" "and" "vinegar" "potato" 1.
+Example ex3 := quadruple "salt" "and" "vinegar" "chips" 2.
+Example graph1 := addTuple ex1 emptyGraph.
+Example graph2 := addTuple ex2 graph1.
+Example graph3 := addTuple ex3 graph2.
+Compute getAdjacencyList ex1 graph1.
+Compute getAdjacencyList ex1 graph2.
+Compute getAdjacencyList ex1 graph3.
+
