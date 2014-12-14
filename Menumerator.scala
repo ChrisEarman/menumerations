@@ -157,6 +157,7 @@ object Menumerator {
                 graph.addSentence(instruction.text, recipe.id)
             }
         }
+        graph.printGraph()
 
         val randomRecipe = getRandomizedRecipe(graph, recipeCollection)
         randomRecipe.printRecipe()

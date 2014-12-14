@@ -11,8 +11,7 @@ package menumerations
 case class Recipe(ingredients: Set[Ingredient], instructions: Seq[Instruction], id: Int) {
 
     def printRecipe() = {
-        println("################################################################################")
-        println("\tINGREDIENTS")
+        println("\n\tINGREDIENTS")
         ingredients.foreach {
             case(item) => {
                 println(item.text)
@@ -24,7 +23,7 @@ case class Recipe(ingredients: Set[Ingredient], instructions: Seq[Instruction], 
                 println(item.text)
             }
         }
-        println("################################################################################")
+        println("\n")
     }
 
 }
