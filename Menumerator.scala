@@ -129,6 +129,7 @@ object Menumerator {
                 }
             }
         }
+        seedRecipe.printRecipe()
         return Recipe(ingredients, instructions, 0)
     }
 
@@ -158,7 +159,7 @@ object Menumerator {
         }
 
         val randomRecipe = getRandomizedRecipe(graph, recipeCollection)
-        println(randomRecipe)
+        randomRecipe.printRecipe()
     }
 
     def main(args: Array[String]) {

@@ -8,4 +8,23 @@ package menumerations
  *  				ordered as specified by the recipe
  *  - id:			the numerical id of the recipe, as found on food.com
  */
-case class Recipe(ingredients: Set[Ingredient], instructions: Seq[Instruction], id: Int)
+case class Recipe(ingredients: Set[Ingredient], instructions: Seq[Instruction], id: Int) {
+
+    def printRecipe() = {
+        println("################################################################################")
+        println("\tINGREDIENTS")
+        ingredients.foreach {
+            case(item) => {
+                println(item.text)
+            }
+        }
+        println("\tINSTRUCTIONS")
+        instructions.foreach {
+            case(item) => {
+                println(item.text)
+            }
+        }
+        println("################################################################################")
+    }
+
+}
